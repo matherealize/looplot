@@ -1,0 +1,800 @@
+---
+title: "loopR: Gallery of examples"
+author: "Michael Kammer"
+date: "`r Sys.Date()`"
+output: 
+    rmarkdown::html_vignette:
+        fig_width: 8
+        fig_height: 6
+        toc: true
+        toc_depth: 2
+        number_sections: true
+vignette: >
+  %\VignetteIndexEntry{loopR: Gallery of examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+bibliography: "Demo_references.bib"
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(dplyr)
+library(magrittr)
+library(purrr)
+library(loopR)
+```
+
+This vignette contains example annotated use-cases of the `loopR` package.
+We introduce several of the available options and briefly explain their effect.
+For an in-depth introduction into the goals of this package and the general 
+workflow, see the vignette ["loopR: A package for creating nested loop plots"](Demo.html).
+
+For many options to further customize the plots, please refer to the 
+documentation of the underlying [ggplot2 package](https://ggplot2.tidyverse.org/index.html).
+
+# Example 1: general use-case
+This example uses the same artifically created dataset as the other vignette. 
+
+## Data
+```{r echo=TRUE}
+set.seed(14)
+params = list(
+    samplesize = c(100, 200, 500),
+    param1 = c(1, 2), 
+    param2 = c(1, 2, 3), 
+    param3 = c(1, 2, 3, 4)
+)
+
+design = expand.grid(params)
+
+# add some "results"
+design %<>% 
+    mutate(method1 = rnorm(n = n(),
+                           mean = param1 * (param2 * param3 + 1000 / samplesize), 
+                           sd = 2), 
+           method2 = rnorm(n = n(),
+                           mean = param1 * (param2 + param3 + 2000 / samplesize), 
+                           sd = 2), 
+           method3 = rnorm(n = n(),
+                           mean = param1 * (param2 + param3 + 3000 / samplesize), 
+                           sd = 2))
+
+print(head(design, n = 10))
+```
+
+## Basic facetted nested loop plot {#basic}
+
+- Define x-axis, grid facets and parameter step functions (`x`, `grid_rows`, 
+`grid_cols`, `steps`). 
+- Adjust step positions (`steps_y_base`, `steps_y_height`).
+- Set axis names (`x_name`, `y_name`).
+- Adjust spacing between connected areas on the x-axis (`spu_x_shift`).
+- Set color specifications via a function (`colors`).
+- Adjust step annotations (`steps_values_annotate`, `steps_annotation_size`).
+- Add a horizontal line with intercept 0 (`hline_intercept`).
+- Expand the y-axis for proper display of the parameter step functions 
+(`y_expand_add`).
+- Rotate x-axis labels and adjust their position and size (`add_custom_theme`).
+
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_y_base = -10, steps_y_height = 5, 
+                     x_name = "Samplesize", y_name = "Error",
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+## Only rows
+
+- Only set `grid_rows` argument, move other parameters into `steps`.
+- Re-ajust steps positions.
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = c("param2", "param3"),
+                     grid_rows = "param1", 
+                     steps_y_base = -10, steps_y_height = 3, steps_y_shift = 3,
+                     x_name = "Samplesize", y_name = "Error",
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+## Only columns
+- Only set `grid_cols` argument, move other parameters into `steps`.
+- Re-ajust steps positions.
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = c("param2", "param3"),
+                     grid_cols = "param1", 
+                     steps_y_base = -5, steps_y_height = 1, steps_y_shift = 3,
+                     x_name = "Samplesize", y_name = "Error",
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+## "Classic" nested loop plots
+
+- Move all parameters except one into `steps`.
+- Connect all the results via step functions: set argument `draw` to 
+`c("add_points", "add_steps")` to display results via points and steps, then 
+set `connect_spus` to `TRUE`.
+- Re-ajust steps positions.
+
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = c("param1", "param2", "param3"),
+                     draw = "add_steps", 
+                     steps_y_base = -5, steps_y_height = 1, steps_y_shift = 3,
+                     x_name = "Samplesize", y_name = "Error",
+                     spu_x_shift = 200,
+                     connect_spus = TRUE,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 5) 
+                         )
+                     ))
+print(p)
+```
+
+## Spacing on x-axis
+So far the x-axis has been treated as numeric scale with spacing of the breaks
+according to the values of the design parameter which defines the x-axis. 
+If the design parameter is actually a factor, or converted to be one, 
+then the spacing on the x-axis is equal.
+
+- Input data.frame for `nested_loop_plot` now uses a factor as x-axis 
+(converted via `dplyr::mutate`).
+- Adapt gap between different connected areas of the plot (spu) via 
+`spu_x_shift`. Note that the gap between any two datapoints on the x-axis is 
+now exactly one unit.
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+x_factor_design = design %>% 
+    mutate(samplesize = as.factor(samplesize))
+p = nested_loop_plot(resdf = x_factor_design, 
+                     x = "samplesize", steps = c("param1", "param2", "param3"),
+                     draw = "add_steps", 
+                     steps_y_base = -5, steps_y_height = 1, steps_y_shift = 3,
+                     x_name = "Samplesize", y_name = "Error",
+                     spu_x_shift = 1,
+                     connect_spus = TRUE,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 5) 
+                         )
+                     ))
+print(p)
+```
+
+## Re-labelling data
+Data can be re-labelled to streamline the display of parameters on the x-axis
+or give meaningful names to panels.
+
+- Relabel data using `replace_labels`.
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_y_base = -10, steps_y_height = 5, 
+                     x_name = "Samplesize", y_name = "Error",
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     replace_labels = list(
+                         samplesize = c("100$" = "100", 
+                                        "200$" = "", 
+                                        "500$" = "500"), 
+                         param2 = c("1" = "low", 
+                                    "2" = "mid", 
+                                    "3" = "high"),
+                         param3 = c("1" = "very low",  # partial replacement
+                                    "4" = "very high")
+                     ),
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+## Changing and adding design elements
+Elements of the plot can be customized. Note that these parameters 
+(`sizes`, `line_linetypes`, `point_shapes`, `colors`) all at least take either
+a single numeric value, a vector of numeric values or a named vector of 
+numeric values specifying which method should have which value.
+
+- Provide different linetpyes per method (`line_linetypes`).
+- Provide different point shapes per method (`point_shapes`).
+- Provide different point sizes per method. This requires passing a numeric
+vector to `sizes` and setting `point_size` to `NULL` due to the underlying 
+implementation in the `ggplot2` package.
+- Fixing linewidth to 1 (`line_size`).
+- Add a ribbon around zero, .e.g to indicate confidence regions, simulation
+monte carlo error or a target region the methods should reach (added to 
+post-processing list via `add_annotation`).
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_y_base = -10, steps_y_height = 5, 
+                     x_name = "Samplesize", y_name = "Error",
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     line_linetypes = c(1, 2, 3),
+                     point_shapes = c("method1" = 2, "method2" = 3, "method3" = 1),
+                     sizes = c(1, 1.5, 2), point_size = NULL, 
+                     line_size = 1,
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         # add ribbon via an annotation
+                         add_annotation = list(
+                             geom = "rect",
+                             xmin = -Inf, xmax = Inf, # stretch whole x-axis
+                             ymin = 0, ymax = 10, alpha = 0.1, fill = "black"
+                         ),
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+
+## Partial designs
+In a partial design, not every possible combination of values for the 
+design parameters is present in the results from the experiment. In our 
+example, we simply remove parts corresponding to two design parameters 
+from the data.frame containing the data. 
+
+- The `design_type` can be set to "partial" to remove the parameter step 
+functions for the missing design parts. If left at default ("full"), then 
+the missing parts are added. 
+
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+partial_design = design %>% 
+    filter(!(param2 == 2 & param3 %in% c(3, 4)))
+p = nested_loop_plot(resdf = partial_design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_y_base = -10, steps_y_height = 5, 
+                     x_name = "Samplesize", y_name = "Error",
+                     design_type = "partial",
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+An alternative parameter to use in case of missing data due to partial designs
+determines how "holes" in the data are handled. 
+
+- The `na_rm` argument can be set to TRUE (default) to ignore missing data
+when connecting result values. (Note that in the middle panel no data is 
+available for samplesize 200.)
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+partial_design = design %>% 
+    filter(!(param2 == 2 & samplesize == 200))
+p = nested_loop_plot(resdf = partial_design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_y_base = -10, steps_y_height = 5, 
+                     x_name = "Samplesize", y_name = "Error",
+                     na_rm = TRUE, 
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+- The `na_rm` argument can be set to FALSE make it clear that data is missing 
+by not connecting the result values accross missing data.
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+partial_design = design %>% 
+    filter(!(param2 == 2 & samplesize == 200))
+p = nested_loop_plot(resdf = partial_design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_y_base = -10, steps_y_height = 5, 
+                     x_name = "Samplesize", y_name = "Error",
+                     na_rm = FALSE, 
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+## Free axes and axis adjustments
+Axes of the facets can have different scales. However, currently it is only
+possible to have different y- and x-scales for each row and column, respectively. 
+This is made possible thanks to the [`facet_grid_sc`](https://github.com/zeehio/facetscales) 
+extension of `ggplot2`. Because of this, it is also possible to adjust the 
+axes individually (i.e. per row / per column). 
+
+- Set `grid_scales` argument to "free_y" to free the y-scale. The x-axis remains
+the same, even if set to be free.
+- Adjust y-axis only in second row by passing a list to `y_expand_add` (entries
+of this list are named by the values of the design parameter which defines
+the `grid_rows`).
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_y_base = -10, steps_y_height = 5, 
+                     x_name = "Samplesize", y_name = "Error",
+                     grid_scales = "free_y",
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = list(
+                         "2" = c(10, NULL)
+                     ),
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+## Addtional data display
+The package supports adding steps for meta-information. These do not influence
+the layout of the plot. 
+
+- Additional steps are added via `steps_add` (note that additional column 
+added to the design data.frame).
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+meta_design = design %>% 
+    mutate(Difficulty = if_else(param3 == 4, "Hard", "Easy"))
+p = nested_loop_plot(resdf = meta_design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_add = "Difficulty",
+                     steps_y_base = -10, steps_y_height = 5, steps_y_shift = 10, 
+                     x_name = "Samplesize", y_name = "Error",
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+## Adding geometries to the plot
+Further geometries can be added to the plot via post-processing. Here we add
+text to annotate the results, but also additional points or lines could be 
+drawn in the same way. By passing a new data.frame, even new data can be 
+added in this step, but this is best done using the modular approach 
+[shown below](#modular).
+
+- Annotate results by adding labels to them in post-processing (`add_text`).
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_y_base = -10, steps_y_height = 5, 
+                     x_name = "Samplesize", y_name = "Error",
+                     draw = "add_lines",
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         add_text = list(
+                             decimals = 1, size = 2, vjust = 0, hjust = 0
+                         ),
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+## Axis transformations
+
+The normal axis transformations of `ggplot2` can not be used in general as the
+steps added for simulation parameters are also on the same y-scale as the 
+simulation results. E.g. if a logarithmic scale is to be used for results, but 
+the parameter steps have negative y-coordinates, then the approach using `ggplot2`
+will not work.
+
+Hence, the functionality is implemented by transformation of the data. 
+This can be done by the user outside the `loopR` package or passed to the
+functions implemented in this package using the `trans` argument.
+
+Note that this is a transformation of the data. Hence, the y-axis labels are
+also on the transformed scale. If that is not wanted, the user can easily 
+reverse this transformation for the labels by passing a function to the 
+`y_labels` argument. See documentation. Another possibility is to simply
+rename the y-axis as e.g. 'log2 of results' to indicate the scaling. 
+
+A further consequence is that all additions to the plot such as lines or 
+parameter steps are now also on the transformed scale and may require
+re-adjustment.
+
+- Define transformation by setting `trans`. 
+- Set `ylim`, `y_breaks` and `y_labels` arguments.
+- Adjust parameter step functions and y-axis expansion for proper display.
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_y_base = -0.5, steps_y_height = 0.5, 
+                     x_name = "Samplesize", y_name = "Error",
+                     trans = log2,
+                     ylim = c(0, 6), 
+                     y_breaks = 0:6,
+                     y_labels = function(x) ifelse(x > 0, 2^x, 0),
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(3, 0.5), 
+                     post_processing = list(
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+print(p)
+```
+
+# Example 2: many design parameter
+
+## Data
+We expand the design parameters by another layer of parameters. Overall the 
+setup contains 600 unique parameter combinations.
+
+```{r}
+set.seed(82356)
+params = list(
+    samplesize = c(10, 50, 100, 200, 500),
+    param1 = c(1, 2), 
+    param2 = c(1, 2, 3), 
+    param3 = c(1, 2, 3, 4), 
+    param4 = c(1, 2, 3, 4, 5)
+)
+
+design = expand.grid(params)
+
+design %<>% 
+    mutate(method1 = rnorm(n = n(),
+                           mean = param1 * (param2 * param3 * param4 + 50 / samplesize), 
+                           sd = 2), 
+           method2 = rnorm(n = n(),
+                           mean = param1 * (param2 + param3 + param4 + 100 / samplesize), 
+                           sd = 2), 
+           method3 = rnorm(n = n(),
+                           mean = param1 * (param2 + param3 * param4 + 150 / samplesize), 
+                           sd = 2))
+```
+
+## Plots
+
+- Set x-axis labels to NULL to avoid cluttering display (`x_labels`). Add
+values on x-axis to name of axis.
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = c("param3", "param4"),
+                     grid_rows = "param1", grid_cols = "param2", 
+                     steps_y_base = -10, steps_y_height = 2.5, steps_y_shift = 5, 
+                     x_name = "Samplesize (100, 200, 500)", y_name = "Error",
+                     draw = "add_lines",
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     x_labels = NULL,
+                     post_processing = list(
+                         add_custom_theme = list(legend.position = "top")
+                     ))
+print(p)
+```
+
+- Add grid lines as in @NestedLoop (adjust theme in `add_custom_theme`).
+```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
+p = nested_loop_plot(resdf = design, 
+                     x = "samplesize", steps = c("param1", "param2", "param3", "param4"),
+                     steps_y_base = -10, steps_y_height = 2.5, steps_y_shift = 7.5, 
+                     x_name = "Samplesize (100, 200, 500)", y_name = "Error",
+                     draw = "add_lines", 
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     x_labels = NULL,
+                     post_processing = list(
+                         add_custom_theme = list(
+                             legend.position = "top", 
+                             panel.grid.major = element_line(
+                                 color = "grey95", size = 0.1
+                             )
+                         )
+                     ))
+print(p)
+```
+
+
+# Modular use of the package {#modular}
+While the main interface to this package is a single function, the creation
+of nested loop plots is actually implemented via modular functions. 
+This is useful if the user wants more control over the design of the plot
+and especially if additional meta-data should be added. 
+
+## Step-by-step
+We recreate the [basic facetted nested loop plot](#basic) using the 
+same data step by step. 
+These are
+
+- Creation of basic plotting data via `nested_loop_base_data`. This data.frame
+contains all information to create the nested loop plots from this package, 
+except for the data for drawing design parameter step functions. It 
+can be used to add further information for plotting.
+- Creation of a basic `ggplot2` object via `nested_loop_base_plot`. It does not
+contain design parameter step functions.
+- Addition of data for drawing parameter step functions via `nested_loop_paramsteps_data`.
+- Updating the `ggplot2` object for drawing parameter step functions.
+- Add post-processing to the `ggplot2` object to adjust scales and axes.
+
+```{r include=FALSE}
+set.seed(14)
+params = list(
+    samplesize = c(100, 200, 500),
+    param1 = c(1, 2), 
+    param2 = c(1, 2, 3), 
+    param3 = c(1, 2, 3, 4)
+)
+
+design = expand.grid(params)
+
+# add some "results"
+design %<>% 
+    mutate(method1 = rnorm(n = n(),
+                           mean = param1 * (param2 * param3 + 1000 / samplesize), 
+                           sd = 2), 
+           method2 = rnorm(n = n(),
+                           mean = param1 * (param2 + param3 + 2000 / samplesize), 
+                           sd = 2), 
+           method3 = rnorm(n = n(),
+                           mean = param1 * (param2 + param3 + 3000 / samplesize), 
+                           sd = 2))
+```
+
+```{r message=FALSE, warning=FALSE}
+plot_data = nested_loop_base_data(
+    design, 
+    x = "samplesize", steps = "param3",
+    grid_rows = "param1", grid_cols = "param2",
+    spu_x_shift = 75
+)
+
+p = nested_loop_base_plot(
+    plot_data,
+    x_name = "Samplesize",
+    y_name = "Error", 
+    colors = scales::brewer_pal(palette = "Dark2")
+)
+print(p)
+
+plot_data = nested_loop_paramsteps_data(
+    plot_data,
+    steps_y_base = -10,
+    steps_y_height = 5
+)
+
+p = nested_loop_paramsteps_plot(
+    p, plot_data, 
+    steps_values_annotate = TRUE, 
+    steps_annotation_size = 2.5
+)
+print(p)
+
+p = add_processing(
+    p, 
+    list(
+        # set limits
+        adjust_ylim = list(
+            y_expand_add = c(10, NULL)
+        ),
+        # adjust theme
+        add_custom_theme = list(
+            axis.text.x = element_text(angle = -90, 
+                                       vjust = 0.5, 
+                                       size = 8)
+        ), 
+        # add horizontal lines
+        add_abline = list(
+            intercept = 0
+        )
+    )
+)
+print(p)
+```
+
+## Advanced usage
+Using the package functions modularly opens up many more options for 
+customization. These are all based on modification of the data.frames which 
+are returned by `nested_loop_base_data` and `nested_loop_paramsteps_data` that
+provide the basis data for the plotting functions of this package.
+
+We demonstrate an exemplary customization here. First, we obtain the 
+necessary data. The data.frame of interest is stored in the `plotdf` entry of
+the resulting list, which can be modified to add meta-information to the 
+plots. We do this using the `dplyr::mutate` and `dplyr::case_when` 
+functionality.
+
+- Annotate scenarios of special interest, e.g. due especially interesting
+combination of design parameters. Here we indicate scenarios with samplesize
+of 100 or 200, param3 of 1 and param2 either 2 or 3.
+- Annotate unusually high values by their numeric value. 
+
+```{r message=FALSE, warning=FALSE}
+plot_data = nested_loop_base_data(
+    design, 
+    x = "samplesize", steps = "param3",
+    grid_rows = "param1", grid_cols = "param2",
+    spu_x_shift = 75
+) %>%
+    nested_loop_paramsteps_data(
+        plot_data,
+        steps_y_base = -10,
+        steps_y_height = 5
+    )
+
+# create annotation data
+plot_data$plotdf %<>% 
+    mutate(
+        annotate_scenario = case_when(
+            samplesize %in% c(100, 200) & 
+                param3 == 1 & 
+                param2 %in% c(2, 3)
+                ~ 0 # height at which a point should be drawn on y-axis
+            ),
+        annotate_value = case_when(y_coord > 60 ~ y_coord) %>% 
+            round(2)
+    )
+```
+
+We add the additional plot elements to the post-processing list via `add_points`
+and `add_text`.
+```{r message=FALSE, warning=FALSE}
+p = nested_loop_base_plot(
+    plot_data,
+    x_name = "Samplesize",
+    y_name = "Error", 
+    colors = scales::brewer_pal(palette = "Dark2")
+) %>% 
+    nested_loop_paramsteps_plot(
+        plot_data, 
+        steps_values_annotate = TRUE, 
+        steps_annotation_size = 2.5
+    ) %>% 
+    add_processing(
+        list(
+            # annotate interesting scenarios
+            add_points = list(
+                mapping = aes(y = annotate_scenario), 
+                shape = 8, color = "red"
+            ),
+            # annotate high values
+            add_text = list(
+                mapping = aes(label = annotate_value), 
+                color = "black", size = 3, hjust = 0, vjust = 0,
+                nudge_x = 20, nudge_y = 1
+            ),
+            # set limits
+            adjust_ylim = list(
+                y_expand_add = c(10, NULL)
+            ),
+            # adjust theme
+            add_custom_theme = list(
+                axis.text.x = element_text(angle = -90, 
+                                           vjust = 0.5, 
+                                           size = 8)
+            )
+        )
+    )
+print(p)
+```
+
+# R session information {#rsession}
+```{r echo=FALSE}
+sessionInfo()
+```
+
+# References
