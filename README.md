@@ -1,4 +1,4 @@
-# loopR: A R package for creating nested loop plots
+# loopR: An R package for creating nested loop plots
 
 Generate nested loop plots to display results from controlled experiments and 
 statistical simulation studies. Implements the visualisation presented in 
