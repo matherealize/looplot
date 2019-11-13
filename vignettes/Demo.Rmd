@@ -32,7 +32,7 @@ measurments are performed under pre-specified conditions. The results of such
 an experimental study are then stored along with the pre-specified conditions
 that gave rise to them (the key parameters). Often, such data is then 
 presented in form of a table to make the performed measurements comparable
-accross the varitey of conditions. However, if there are many different
+across the variety of conditions. However, if there are many different
 experimental constraints, the resulting table easily becomes unintelligible. 
 In such cases, a visual display can aid in the interpretation of the complex
 experimental data.
@@ -50,15 +50,15 @@ Simulation studies in statistics or other methodological research fields are
 controlled experiments used to assess the properties of algorithms, 
 gauge the performance of statistical or machine learning models, and gain 
 insights into complex phenomena which are not readily understood analytically. 
-While simulation studies by nature are simplifying the "true", underlying mechanisms of interest, 
+While simulation studies by nature are simplifying the "true" underlying mechanisms of interest, 
 they are useful because they allow the complete specification of the 
 "ground truth" to which comparisons can be made and the experimental conditions
 are fully under control of the experimenter. Such studies
 typically consist of three major components: 
 
-- A data generating mechanism.
-- The methods or models to be evaluated.
-- Evaluation criteria to assess the methods after application to the generated data.
+- A data generating mechanism
+- The methods or models to be evaluated
+- Evaluation criteria to assess the methods after application to the generated data
 
 All three together make up what we will call the *simulation study design*.
 
@@ -81,9 +81,10 @@ for a given simulation scenario.
 
 ## Nested loop plots
 Nested loop plots are a data visualisation for tabular data which is dependent
-on several design parameter. They were suggested in @NestedLoop for
+on several design parameters. Their visual appearance is similar to trellis plots.
+@NestedLoop suggested nested loop plots for
 displaying the results accross the different scenarios of a simulation study. 
-They key idea is to display the design parameters along with the results
+The key idea is to display the design parameters along with the results
 for each specific scenario they define and to arrange the display in a
 meaningful way to facilitate the clear distinction
 of patterns within the results. As suggested in the original publication, 
@@ -97,7 +98,7 @@ A challenge when using nested loop plots is their complexity and information
 density. For these reasons it is also often necessary to use large figure sizes
 to accurately display all of the details appropriately. 
 It is not straightforward to design a good looking nested loop plot
-with good layout and easily readable display of the data. Manual tweaking
+with clear layout and easily readable display of the data. Manual tweaking
 of the display is often necessary. 
 That is the reason why this package exists to streamline the creation of nested loop
 plots and making them more accessible.
@@ -106,12 +107,12 @@ In short, nested loop plots work well for many possible simulation study
 designs, in particular if:
 
 - The simulation study design has a structure which can be captured by a 
-few design parameters, i.e. a full or partial factorial design in which
-simulation scenarios for each unique combination of the values of a few 
+few design parameters (e.g. 4 to 6), i.e. a full or partial factorial design in which
+simulation scenarios for each unique combination of the values of the design 
 parameters are conducted.
-- The results from the simulation study can be described by a few 
+- The results from the simulation study can be quantitatively described by numeric
 performance measures.
-- The number of design parameters and methods evaluated is moderate.
+- The number of design parameters (e.g. 4 to 6) and methods evaluated is moderate.
 
 ## Workflow with the `loopR` package
 
@@ -135,7 +136,7 @@ We will give an example of such a dataframe in the [examples below](#data).
 
 The user then defines the arrangement of the data within the nested loop plot 
 and how the data should be displayed. There are two ways to work with the
-`loopR` package: one with basic options or users who are less familiar
+`loopR` package: one with basic options for users who are less familiar
 with the underlying `ggplot2` framework, and the other for users who
 require modular access to specific parts of the plot to fine-tune the display.
 In either case, the resulting plot object is a `ggplot2` object and can 
@@ -155,7 +156,7 @@ to be available. Please refer to
 [the R environment used to create this vignette](#rsession) for 
 detailed information.
 
-We generate a basic, artifical example dataframe representing the output of a potential, 
+We generate an artificial example dataframe representing the output of a potential, 
 actual simulation study which features a fully factorial design with 4 design 
 parameters (`samplesize, param1, param2, param3`). For each combination of the
 values of the parameters we generate some artificial data that depends on these values. 
@@ -208,7 +209,7 @@ easily compared accross different panel configurations.
 Furthermore this package uses the idea of "smallest plottable units" (spu), 
 which are defined as all results for simulation scenarios for which *only* a 
 single design parameter changes (drawn on the x-axis of the plot),
-while all other design parameters remain at a fixed value. By seperating such
+while all other design parameters remain at a fixed value. By separating such
 spus from each other, meaningful subgroups of the results can be visually
 identified and represented. 
 
@@ -224,7 +225,7 @@ order and is well suited to define an x-axis along which results can be
 arranged. 
 
 The design is heavily influenced by `param1`, which only has two categories
-and may therefore be ideally define either the columnds or the rows of the 
+and therefore ideally defines either the columns or the rows of the 
 facetted plot. 
 
 The role of the other parameters is less clear and their influence on the 
@@ -253,7 +254,7 @@ Further details of the plot which often need to be taken care of:
 
 - We give proper names to the x- and y-axis via `x_name` and `y_name`.
 - We widen the gap between connected areas of the x-axis in x-axis units via
-`spu_x_shift` (spu stand for smallest plottable unit as outlined [above](#layout)). 
+`spu_x_shift` (spu stand for "smallest plottable" unit as outlined [above](#layout)). 
 - We enable the drawing of the design parameter values alongside the 
 parameter step functions via `steps_values_annotate` and adjust the font size 
 of the annotations appropriately for the desired figure size via `steps_annotation_size`.
