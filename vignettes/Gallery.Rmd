@@ -14,6 +14,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 bibliography: "Demo_references.bib"
+urlcolor: blue
 ---
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -34,7 +35,7 @@ documentation of the underlying [ggplot2 package](https://ggplot2.tidyverse.org/
 # Example 1: general use-case
 This example uses the same artifically created dataset as the other vignette. 
 
-## Data
+## Data {#ex1data}
 ```{r echo=TRUE}
 set.seed(14)
 params = list(
@@ -58,7 +59,7 @@ design %<>%
                            mean = param1 * (param2 + param3 + 3000 / samplesize), 
                            sd = 2))
 
-print(head(design, n = 10))
+knitr::kable(head(design, n = 10))
 ```
 
 ## Basic facetted nested loop plot {#basic}
@@ -449,14 +450,25 @@ p = nested_loop_plot(resdf = meta_design,
 print(p)
 ```
 
-## Adding geometries to the plot
-Further geometries can be added to the plot via post-processing. Here we add
-text to annotate the results, but also additional points or lines could be 
-drawn in the same way. By passing a new data.frame, even new data can be 
-added in this step, but this is best done using the modular approach 
-[shown below](#modular).
+## Adding geometries to the plot {#addgeom}
+Further geometries can be added to the plot via post-processing. For several 
+simple geometries convenience wrapper functions are implented in this package
+(all starting with `add_`) so that only the parameters of the geometry need
+to be passed to post-processing. However, arbitrary geometries are supported
+via the `add_geom_at_position` wrapper function, which allows the user to 
+directly pass any geometry object. 
+
+Here we add text to annotate the results, but also additional points or lines
+could be drawn in the same way. By passing a new data.frame, even new data can be 
+added in this step. 
+Examples for such advanced usage are shown below for
+adding [panel specific geometries](#panel) or using this package in a 
+[modularl fashion](#modular).
 
 - Annotate results by adding labels to them in post-processing (`add_text`).
+- Add ribbons behind the other geometries to highlight areas of the plot via
+`add_geom_at_position` (note that `inherit.aes` is set to FALSE so that the rest
+of the plot does not impact the ribbons).
 ```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
 p = nested_loop_plot(resdf = design, 
                      x = "samplesize", steps = "param3",
@@ -472,6 +484,17 @@ p = nested_loop_plot(resdf = design,
                      post_processing = list(
                          add_text = list(
                              decimals = 1, size = 2, vjust = 0, hjust = 0
+                         ),
+                         add_geom_at_position = list(
+                             g = geom_rect(
+                                 data = NULL,
+                                 xmin = -Inf, xmax = Inf, 
+                                 ymin = 0, ymax = 10, 
+                                 alpha = 0.005, fill = "blue",
+                                 linetype = "blank",
+                                 inherit.aes = FALSE
+                             ),
+                             position = "bottom" # place below other geometries
                          ),
                          add_custom_theme = list(
                              axis.text.x = element_text(angle = -90, 
@@ -560,6 +583,8 @@ design %<>%
            method3 = rnorm(n = n(),
                            mean = param1 * (param2 + param3 * param4 + 150 / samplesize), 
                            sd = 2))
+
+knitr::kable(head(design, n = 10))
 ```
 
 ## Plots
@@ -609,14 +634,112 @@ p = nested_loop_plot(resdf = design,
 print(p)
 ```
 
+# Advanced usage
 
-# Modular use of the package {#modular}
+## Panel specific decorations {#panel}
+Annotations may depend on the design factors of the simulation study. For 
+example, variability or highlighted regions in the plot may be indicated by
+ribbons, which in turn may depend on the column variable of the facets. To add
+such panel parameter specific decorations we can use the following  
+approach. We demonstrate them by [recreating panel specific ribbons](#addgeom).
+Data is created in the same way as in the [first example](#ex1data).
+
+```{r include=FALSE}
+set.seed(14)
+params = list(
+    samplesize = c(100, 200, 500),
+    param1 = c(1, 2), 
+    param2 = c(1, 2, 3), 
+    param3 = c(1, 2, 3, 4)
+)
+
+design = expand.grid(params)
+
+# add some "results"
+design %<>% 
+    mutate(method1 = rnorm(n = n(),
+                           mean = param1 * (param2 * param3 + 1000 / samplesize), 
+                           sd = 2), 
+           method2 = rnorm(n = n(),
+                           mean = param1 * (param2 + param3 + 2000 / samplesize), 
+                           sd = 2), 
+           method3 = rnorm(n = n(),
+                           mean = param1 * (param2 + param3 + 3000 / samplesize), 
+                           sd = 2))
+```
+
+- Augment the initial data matrix by additional columns which specify panel-wise
+parameters for the geometries to add by using `dplyr::case_when`. 
+- Use `pass_through` argument of the `nested_loop_plot` function to pass the
+augmented columns untouched to post-processing. They leave the rest of the plot
+completely unaffected.
+-  Add geometries that work with the columns that were passed through. 
+For that we use the `add_geom_at_position` function in post-processing and make
+sure to set `inherit.aes` to FALSE (otherwise the legend may be affected by the 
+new geometries).
+```{r message=FALSE, warning=FALSE}
+# augment design data 
+augmented_design = design %>% mutate(
+    ymin = case_when(param2 == 1 ~ 0, 
+                     param2 == 2 ~ 10), 
+    ymax = case_when(param2 == 1 ~ 10, 
+                     param2 == 2 ~ 20), 
+    note = case_when(param2 == 3 & param1 == 1 ~ "This is a special case.")
+)
+
+p = nested_loop_plot(resdf = augmented_design, 
+                     x = "samplesize", steps = "param3",
+                     grid_rows = "param1", grid_cols = "param2",
+                     # pass data to post-processing
+                     pass_through = c("ymin", "ymax", "note"),
+                     steps_y_base = -10, steps_y_height = 5, 
+                     x_name = "Samplesize", y_name = "Error",
+                     draw = c("add_points", "add_lines"),
+                     spu_x_shift = 75,
+                     colors = scales::brewer_pal(palette = "Dark2"),
+                     steps_values_annotate = TRUE, steps_annotation_size = 2.5, 
+                     hline_intercept = 0, 
+                     y_expand_add = c(10, NULL), 
+                     post_processing = list(
+                         # add geometries that use the passed through data
+                         # add panel specific text
+                         add_geom_at_position = list(
+                             geom = geom_text(
+                                 aes(x = 50, y = 60, label = note), 
+                                 size = 4, color = "black", 
+                                 hjust = 0,
+                                 inherit.aes = FALSE)
+                         ),
+                         # add panel specific ribbons
+                         add_geom_at_position = list(
+                             geom = geom_rect(
+                                 aes(ymin = ymin, ymax = ymax),
+                                 xmin = -Inf, xmax = Inf, 
+                                 alpha = 0.005, fill = "blue",
+                                 linetype = "blank",
+                                 inherit.aes = FALSE
+                             ),
+                             position = "bottom" # place below other geometries
+                         ),
+                         add_custom_theme = list(
+                             axis.text.x = element_text(angle = -90, 
+                                                        vjust = 0.5, 
+                                                        size = 8) 
+                         )
+                     ))
+
+print(p)
+```
+
+Similar results can also be obtained when working with the package in a 
+modular fashion, as demonstrated below.
+
+## Modular use of the package {#modular}
 While the main interface to this package is a single function, the creation
 of nested loop plots is actually implemented via modular functions. 
 This is useful if the user wants more control over the design of the plot
 and especially if additional meta-data should be added. 
 
-## Step-by-step
 We recreate the [basic facetted nested loop plot](#basic) using the 
 same data step by step. 
 These are
@@ -706,8 +829,8 @@ p = add_processing(
 print(p)
 ```
 
-## Advanced usage
-Using the package functions modularly opens up many more options for 
+## Customizing plots
+Using the package functions [modularly](#modular) opens up many more options for 
 customization. These are all based on modification of the data.frames which 
 are returned by `nested_loop_base_data` and `nested_loop_paramsteps_data` that
 provide the basis data for the plotting functions of this package.
@@ -731,7 +854,6 @@ plot_data = nested_loop_base_data(
     spu_x_shift = 75
 ) %>%
     nested_loop_paramsteps_data(
-        plot_data,
         steps_y_base = -10,
         steps_y_height = 5
     )
@@ -751,7 +873,8 @@ plot_data$plotdf %<>%
 ```
 
 We add the additional plot elements to the post-processing list via `add_points`
-and `add_text`.
+and `add_text`. Note that we set `inherit.aes` to FALSE so that the points
+do not show up in the legend.
 ```{r message=FALSE, warning=FALSE}
 p = nested_loop_base_plot(
     plot_data,
@@ -768,8 +891,8 @@ p = nested_loop_base_plot(
         list(
             # annotate interesting scenarios
             add_points = list(
-                mapping = aes(y = annotate_scenario), 
-                shape = 8, color = "red"
+                mapping = aes(x = samplesize, y = annotate_scenario), 
+                shape = 8, color = "red", inherit.aes = FALSE
             ),
             # annotate high values
             add_text = list(

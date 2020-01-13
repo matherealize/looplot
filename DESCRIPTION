@@ -1,6 +1,6 @@
 Package: loopR
 Title: Create nested loop plots
-Version: 0.5.0
+Version: 0.5.0.9000
 Author: Michael Kammer [aut, cre]
 Authors@R: person("Michael", "Kammer", 
     email = "michael.kammer@meduniwien.ac.at", 

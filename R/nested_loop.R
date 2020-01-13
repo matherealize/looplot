@@ -43,6 +43,11 @@
 #' loop plot. Default NULL means 
 #' that all columns not mentioned in \code{x, grid_rows, grid_cols, steps} and
 #' \code{steps_add} are used. Allows to subset to only draw methods of interest.
+#' @param pass_through
+#' NULL or character vector with names of columns in resdf which will be passed
+#' to post-processing, without otherwise affecting the plot. Useful to add e.g.
+#' panel specific decorations (see corresponding section in the Gallery 
+#' vignette of this package).
 #' @param trans
 #' Function name or object, to be called via \code{do.call} to transform the
 #' plotted values.
@@ -74,7 +79,6 @@
 #' @param methods_col_name
 #' String which is used as column name for the column which encodes which 
 #' method was used for which result.
-
 #' 
 #' @return 
 #' Returns a named list with components 
@@ -100,6 +104,7 @@ nested_loop_base_data <- function(resdf,
                                   steps = NULL,
                                   steps_add = NULL,
                                   methods = NULL,
+                                  pass_through = NULL,
                                   trans = identity,
                                   design_parameters_values = NULL,
                                   design_type = "full",
@@ -119,13 +124,16 @@ nested_loop_base_data <- function(resdf,
     input = list(x = x, 
                  grid_rows = grid_rows, grid_cols = grid_cols, 
                  steps = steps, steps_add = steps_add, 
+                 pass_through = pass_through,
                  parameter_decreasing = parameter_decreasing)
     
     # save out all important columns for later use
     id_columns = list(
         design_parameter = c(grid_rows_final, grid_cols_final, x, steps), 
         steps_parameter = c(steps, steps_add), 
-        all_parameter = c(grid_rows_final, grid_cols_final, x, steps, steps_add)
+        all_parameter = c(grid_rows_final, grid_cols_final, x, 
+                          steps, steps_add, 
+                          pass_through)
     )
 
     # set methods to draw
@@ -215,15 +223,9 @@ nested_loop_base_data <- function(resdf,
     # lowest spu facets and overall step identifier
     plotdf[, paste0("spu", n_vary_param)] = plotdf$facet
     for (s in seq_along(steps) %>% rev()) {
-        plotdf[, paste0("spu", s)] = 
-            paste0(plotdf[[paste0("spu", s + 1)]], "_", 
-                   plotdf[[paste0("step", s)]])
-    }
-    # convert to factors and then to numeric
-    # note that this can not be done in the loop above, since the 
-    # spu levels depend on each other
-    for (s in 1:n_vary_param) {
-        plotdf[[paste0("spu", s)]] %<>% as.factor() %>% as.numeric()
+        n_spus_before = n_distinct(plotdf[[paste0("spu", s + 1)]])
+        plotdf[, paste0("spu", s)] = plotdf[[paste0("step", s)]] + 
+            n_spus_before * (plotdf[[paste0("spu", s + 1)]] - 1) 
     }
 
     # add spu coordinates
@@ -371,9 +373,15 @@ nested_loop_paramsteps_data <- function(plot_data,
 #' Character which is used as x-axis label.
 #' @param legend_name
 #' String which is used as legend name.
+#' @param legend_breaks
+#' A character vector of breaks for the scales. Can be used to e.g. exclude
+#' certain methods from the legend. If NULL, then no breaks are displayed in the
+#' legend. Otherwise, must be the same length as \code{legend_labels}, 
+#' if one of them is changed from the default.
 #' @param legend_labels
 #' NULL or character vector which is used as keys in legend. Overrides variable 
-#' columns names in resdf.
+#' columns names in resdf. Must be the same length as \code{legend_breaks}, 
+#' if one of them is changed from the default.
 #' @param draw
 #' Named list of lists. Each entry specifies as its name a wrapper function
 #' (one of \code{\link{add_points}, \link{add_lines}, \link{add_steps}}) and 
@@ -434,6 +442,7 @@ nested_loop_base_plot <- function(plot_data,
                                   y_name = waiver(),
                                   x_name = waiver(),
                                   legend_name = "Method",
+                                  legend_breaks = waiver(),
                                   legend_labels = NULL,
                                   draw = list(
                                       add_points = list(
@@ -609,13 +618,17 @@ nested_loop_base_plot <- function(plot_data,
     # set scales and legend labels
     p = p + 
         scale_color_manual(values = rep_len(colors, n_methods), 
-                               labels = legend_labels) +
+                           breaks = legend_breaks,
+                           labels = legend_labels) +
         scale_shape_manual(values = rep_len(shapes, n_methods),
+                           breaks = legend_breaks,
                            labels = legend_labels) + 
         scale_linetype_manual(values = rep_len(linetypes, n_methods),
+                              breaks = legend_breaks,
                               labels = legend_labels) + 
         scale_size_manual(values = rep_len(sizes, n_methods), 
-                   labels = legend_labels)
+                          breaks = legend_breaks,
+                          labels = legend_labels)
     
     # finalize
     p = p +
@@ -858,6 +871,11 @@ nested_loop_paramsteps_plot <- function(p, step_data,
 #' loop plot. Default NULL means 
 #' that all columns not mentioned in \code{x, grid_rows, grid_cols, steps} and
 #' \code{steps_add} are used. Allows to subset to only draw methods of interest.
+#' @param pass_through
+#' NULL or character vector with names of columns in resdf which will be passed
+#' to post-processing, without otherwise affecting the plot. Useful to add e.g.
+#' panel specific decorations (see corresponding section in the Gallery 
+#' vignette of this package).
 #' @param trans
 #' Function name or object, to be called via \code{do.call} to transform the
 #' plotted values.
@@ -898,9 +916,15 @@ nested_loop_paramsteps_plot <- function(p, step_data,
 #' design parameters which are used for steps.
 #' @param legend_name
 #' String which is used as legend name.
+#' @param legend_breaks
+#' A character vector of breaks for the scales. Can be used to e.g. exclude
+#' certain methods from the legend. If NULL, then no breaks are displayed in the
+#' legend. Otherwise, must be the same length as \code{legend_labels}, 
+#' if one of them is changed from the default.
 #' @param legend_labels
 #' NULL or character vector which is used as keys in legend. Overrides variable 
-#' columns names in resdf.
+#' columns names in resdf. Must be the same length as \code{legend_breaks}, 
+#' if one of them is changed from the default.
 #' @param connect_spus
 #' Logical - if TRUE, individual spus are connected by lines, this is necessary
 #' to reproduce original nested loop plots as suggested in the manuscript by 
@@ -999,7 +1023,8 @@ nested_loop_paramsteps_plot <- function(p, step_data,
 #' Color specification of the step annotation text.
 #' @param na_rm
 #' Logical. Should missing values be removed before plotting? This means that
-#' lines will be connected, even if a missing value is between two values.
+#' lines will be connected, even if a missing value is between two values. 
+#' See details for some useage notes.
 #' @param base_size
 #' Numeric. base_size parameter of \code{\link{theme_bw}}.
 #' @param hline_intercept
@@ -1051,7 +1076,7 @@ nested_loop_paramsteps_plot <- function(p, step_data,
 #' plots are likely to be unreadable due to information density.
 #' The visualisation works best with a fractional factorial design.
 #'  
-#'  @section Axis scaling: 
+#' @section Axis scaling: 
 #' The axis scaling is not fully free. It has the restrictions of 
 #' \code{\link{facet_grid}} and thus:
 #' \itemize{
@@ -1091,6 +1116,13 @@ nested_loop_paramsteps_plot <- function(p, step_data,
 #'  rate for a given parameter specifciation or labeling parameter
 #'  specifications as "difficult scenario" / "easy scenario", etc. See 
 #'  the package vignettes for useage examples.
+#'  
+#' @section Missing data:
+#' In general the \code{na_rm} parameter can be used to deal with missing data.
+#' However, if a whole method is missing, then setting that parameter to TRUE
+#' will lead to unexpected results as a whole column is removed from the 
+#' dataset. In such a case, the parameter should be set to FALSE or the 
+#' method removed from the dataset by the user.
 #' 
 #' @section Useage example:
 #' Further details and usage examples may be found in the package vignettes.
@@ -1130,6 +1162,7 @@ nested_loop_plot <- function(resdf,
                              steps = NULL,
                              steps_add = NULL,
                              methods = NULL,
+                             pass_through = NULL,
                              trans = identity,
                              design_parameters_values = NULL,
                              design_type = "full",
@@ -1141,6 +1174,7 @@ nested_loop_plot <- function(resdf,
                              x_name = waiver(),
                              steps_names = NULL,
                              legend_name = "Method",
+                             legend_breaks = waiver(),
                              legend_labels = NULL,
                              connect_spus = FALSE, 
                              sizes = 1,
@@ -1184,6 +1218,8 @@ nested_loop_plot <- function(resdf,
         x = x, grid_rows = grid_rows, grid_cols = grid_cols,
         trans = trans,
         steps = steps, steps_add = steps_add,
+        methods = methods, 
+        pass_through = pass_through,
         design_parameters_values = design_parameters_values,
         design_type = design_type,
         methods_col_name = legend_name,
@@ -1214,6 +1250,7 @@ nested_loop_plot <- function(resdf,
                                  y_name = y_name,
                                  x_name = x_name,
                                  legend_name = legend_name,
+                                 legend_breaks = legend_breaks,
                                  legend_labels = legend_labels,
                                  draw = draw_list,
                                  connect_spus = connect_spus,
@@ -1302,6 +1339,33 @@ add_processing <- function(p, processing = NULL) {
     p
 }
 
+#' @title Adds \pkg{ggplot2} derived geometry at specified z-level position
+#' 
+#' @param p
+#' \pkg{ggplot2} object, output from \code{\link{nested_loop_plot}} function.
+#' @param geom
+#' \pkg{ggplot2} derived geometry which should be added to the plot object.
+#' @param position
+#' Position of the geometry layer, either "bottom" or "top". By default
+#' lines are added below all other layers in the plot to not obscure them, 
+#' but by setting position to "top", these lines can also be plotted 
+#' above other lines.
+#' 
+#' @details 
+#' Simple wrapper to add arbitrary geometries to nested loop plot. 
+#' 
+#' @return
+#' A \pkg{ggplot2} object.
+#' 
+#' @export
+add_geom_at_position <- function(p, geom, position = "top") {
+    if (position == "bottom") {
+        p$layers = c(geom, p$layers)  
+    } else p = p + geom
+    
+    p
+}
+
 #' @title Wrapper to add points to nested loop plot
 #' 
 #' @description 
@@ -1327,7 +1391,6 @@ add_processing <- function(p, processing = NULL) {
 add_points <- function(p, position = "top", ...) {
     add_geom_at_position(p, geom_point(...), position)
 }
-
 
 #' @title Wrapper to add lines to nested loop plot
 #' 
@@ -1656,17 +1719,6 @@ adjust_ylim <- function(p, y_expand_mult = NULL, y_expand_add = NULL) {
 }
 
 # ggplot2 helper ##############################################################
-#' @title Adds \pkg{ggplot2} geom at specified z-level position
-#' 
-#' @noRd
-add_geom_at_position <- function(p, g, position = "top") {
-    if (position == "bottom") {
-        p$layers = c(g, p$layers)  
-    } else p = p + g
-    
-    p
-}
-
 #' @title Facet labeller helper
 #' 
 #' @description 
