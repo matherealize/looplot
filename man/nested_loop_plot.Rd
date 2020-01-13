@@ -5,25 +5,26 @@
 \title{Facetted nested loop plots}
 \usage{
 nested_loop_plot(resdf, x, grid_rows = NULL, grid_cols = NULL,
-  steps = NULL, steps_add = NULL, methods = NULL, trans = identity,
+  steps = NULL, steps_add = NULL, methods = NULL,
+  pass_through = NULL, trans = identity,
   design_parameters_values = NULL, design_type = "full",
   parameter_decreasing = FALSE, spu_x_shift = 1,
   grid_scales = "fixed", replace_labels = NULL, y_name = waiver(),
   x_name = waiver(), steps_names = NULL, legend_name = "Method",
-  legend_labels = NULL, connect_spus = FALSE, sizes = 1,
-  point_shapes = 19, point_size = NULL, point_alpha = 1,
-  line_linetypes = 1, line_size = 0.5, line_alpha = 1,
-  colors = NULL, draw = c("add_points", "add_lines"),
-  x_labels = waiver(), ylim = NULL, y_expand_mult = NULL,
-  y_expand_add = NULL, y_breaks = waiver(), y_labels = waiver(),
-  steps_draw = TRUE, steps_y_base = 0, steps_y_height = 1,
-  steps_y_shift = NULL, steps_names_annotate = TRUE,
-  steps_values_annotate = FALSE, steps_color = "#AAAAAA",
-  steps_annotation_size = 5, steps_annotation_nudge = 0.2,
-  steps_annotation_color = "#AAAAAA", na_rm = TRUE, base_size = 12,
-  hline_intercept = NULL, hline_linetype = 3, hline_size = 0.5,
-  hline_colour = "black", hline_alpha = 1, post_processing = NULL,
-  return_data = FALSE)
+  legend_breaks = waiver(), legend_labels = NULL,
+  connect_spus = FALSE, sizes = 1, point_shapes = 19,
+  point_size = NULL, point_alpha = 1, line_linetypes = 1,
+  line_size = 0.5, line_alpha = 1, colors = NULL,
+  draw = c("add_points", "add_lines"), x_labels = waiver(),
+  ylim = NULL, y_expand_mult = NULL, y_expand_add = NULL,
+  y_breaks = waiver(), y_labels = waiver(), steps_draw = TRUE,
+  steps_y_base = 0, steps_y_height = 1, steps_y_shift = NULL,
+  steps_names_annotate = TRUE, steps_values_annotate = FALSE,
+  steps_color = "#AAAAAA", steps_annotation_size = 5,
+  steps_annotation_nudge = 0.2, steps_annotation_color = "#AAAAAA",
+  na_rm = TRUE, base_size = 12, hline_intercept = NULL,
+  hline_linetype = 3, hline_size = 0.5, hline_colour = "black",
+  hline_alpha = 1, post_processing = NULL, return_data = FALSE)
 }
 \arguments{
 \item{resdf}{Data.frame with data to be visualised in wide format with columns: 
@@ -57,6 +58,11 @@ results from the experimental study and should be drawn in the nested
 loop plot. Default NULL means 
 that all columns not mentioned in \code{x, grid_rows, grid_cols, steps} and
 \code{steps_add} are used. Allows to subset to only draw methods of interest.}
+
+\item{pass_through}{NULL or character vector with names of columns in resdf which will be passed
+to post-processing, without otherwise affecting the plot. Useful to add e.g.
+panel specific decorations (see corresponding section in the Gallery 
+vignette of this package).}
 
 \item{trans}{Function name or object, to be called via \code{do.call} to transform the
 plotted values.}
@@ -98,8 +104,14 @@ design parameters which are used for steps.}
 
 \item{legend_name}{String which is used as legend name.}
 
+\item{legend_breaks}{A character vector of breaks for the scales. Can be used to e.g. exclude
+certain methods from the legend. If NULL, then no breaks are displayed in the
+legend. Otherwise, must be the same length as \code{legend_labels}, 
+if one of them is changed from the default.}
+
 \item{legend_labels}{NULL or character vector which is used as keys in legend. Overrides variable 
-columns names in resdf.}
+columns names in resdf. Must be the same length as \code{legend_breaks}, 
+if one of them is changed from the default.}
 
 \item{connect_spus}{Logical - if TRUE, individual spus are connected by lines, this is necessary
 to reproduce original nested loop plots as suggested in the manuscript by 
@@ -198,7 +210,8 @@ similar to the \code{nudge_y} argument of \code{\link{geom_text}}.}
 \item{steps_annotation_color}{Color specification of the step annotation text.}
 
 \item{na_rm}{Logical. Should missing values be removed before plotting? This means that
-lines will be connected, even if a missing value is between two values.}
+lines will be connected, even if a missing value is between two values. 
+See details for some useage notes.}
 
 \item{base_size}{Numeric. base_size parameter of \code{\link{theme_bw}}.}
 
@@ -258,8 +271,9 @@ discernible in the plot.
 This function works best with 4 to 6 design parameters - much more and the 
 plots are likely to be unreadable due to information density.
 The visualisation works best with a fractional factorial design.
+}
+\section{Axis scaling}{
  
- @section Axis scaling: 
 The axis scaling is not fully free. It has the restrictions of 
 \code{\link{facet_grid}} and thus:
 \itemize{
@@ -275,6 +289,7 @@ of variables may face some restrictions. The implementation of facetting
 uses the \code{facet_grid_sc} function from the 
 \href{https://github.com/zeehio/facetscales}{facetscales package on Github}.
 }
+
 \section{Axis transformation}{
 
 Axis transformations are implemented by transformations of the data using
@@ -304,6 +319,15 @@ in the plot. For continous data, this could also be realized by additional
  rate for a given parameter specifciation or labeling parameter
  specifications as "difficult scenario" / "easy scenario", etc. See 
  the package vignettes for useage examples.
+}
+
+\section{Missing data}{
+
+In general the \code{na_rm} parameter can be used to deal with missing data.
+However, if a whole method is missing, then setting that parameter to TRUE
+will lead to unexpected results as a whole column is removed from the 
+dataset. In such a case, the parameter should be set to FALSE or the 
+method removed from the dataset by the user.
 }
 
 \section{Useage example}{

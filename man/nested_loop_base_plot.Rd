@@ -6,11 +6,12 @@
 \usage{
 nested_loop_base_plot(plot_data, grid_scales = "fixed",
   y_name = waiver(), x_name = waiver(), legend_name = "Method",
-  legend_labels = NULL, draw = list(add_points = list(alpha = 1),
-  add_lines = list(size = 0.5, alpha = 1)), connect_spus = FALSE,
-  colors = NULL, shapes = 19, linetypes = 1, sizes = 1,
-  x_labels = waiver(), ylim = NULL, y_breaks = waiver(),
-  y_labels = waiver(), na_rm = TRUE, base_size = 12)
+  legend_breaks = waiver(), legend_labels = NULL,
+  draw = list(add_points = list(alpha = 1), add_lines = list(size = 0.5,
+  alpha = 1)), connect_spus = FALSE, colors = NULL, shapes = 19,
+  linetypes = 1, sizes = 1, x_labels = waiver(), ylim = NULL,
+  y_breaks = waiver(), y_labels = waiver(), na_rm = TRUE,
+  base_size = 12)
 }
 \arguments{
 \item{plot_data}{Output list from \code{\link{nested_loop_base_data}}.}
@@ -23,8 +24,14 @@ nested_loop_base_plot(plot_data, grid_scales = "fixed",
 
 \item{legend_name}{String which is used as legend name.}
 
+\item{legend_breaks}{A character vector of breaks for the scales. Can be used to e.g. exclude
+certain methods from the legend. If NULL, then no breaks are displayed in the
+legend. Otherwise, must be the same length as \code{legend_labels}, 
+if one of them is changed from the default.}
+
 \item{legend_labels}{NULL or character vector which is used as keys in legend. Overrides variable 
-columns names in resdf.}
+columns names in resdf. Must be the same length as \code{legend_breaks}, 
+if one of them is changed from the default.}
 
 \item{draw}{Named list of lists. Each entry specifies as its name a wrapper function
 (one of \code{\link{add_points}, \link{add_lines}, \link{add_steps}}) and 

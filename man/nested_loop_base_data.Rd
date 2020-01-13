@@ -5,7 +5,8 @@
 \title{Generate data for facetted nested loop plots}
 \usage{
 nested_loop_base_data(resdf, x, grid_rows = NULL, grid_cols = NULL,
-  steps = NULL, steps_add = NULL, methods = NULL, trans = identity,
+  steps = NULL, steps_add = NULL, methods = NULL,
+  pass_through = NULL, trans = identity,
   design_parameters_values = NULL, design_type = "full",
   methods_col_name = "Method", replace_labels = NULL,
   spu_x_shift = 1, parameter_decreasing = FALSE)
@@ -42,6 +43,11 @@ results from the experimental study and should be drawn in the nested
 loop plot. Default NULL means 
 that all columns not mentioned in \code{x, grid_rows, grid_cols, steps} and
 \code{steps_add} are used. Allows to subset to only draw methods of interest.}
+
+\item{pass_through}{NULL or character vector with names of columns in resdf which will be passed
+to post-processing, without otherwise affecting the plot. Useful to add e.g.
+panel specific decorations (see corresponding section in the Gallery 
+vignette of this package).}
 
 \item{trans}{Function name or object, to be called via \code{do.call} to transform the
 plotted values.}
