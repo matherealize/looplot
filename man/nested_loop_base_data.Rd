@@ -4,12 +4,23 @@
 \alias{nested_loop_base_data}
 \title{Generate data for facetted nested loop plots}
 \usage{
-nested_loop_base_data(resdf, x, grid_rows = NULL, grid_cols = NULL,
-  steps = NULL, steps_add = NULL, methods = NULL,
-  pass_through = NULL, trans = identity,
-  design_parameters_values = NULL, design_type = "full",
-  methods_col_name = "Method", replace_labels = NULL,
-  spu_x_shift = 1, parameter_decreasing = FALSE)
+nested_loop_base_data(
+  resdf,
+  x,
+  grid_rows = NULL,
+  grid_cols = NULL,
+  steps = NULL,
+  steps_add = NULL,
+  methods = NULL,
+  pass_through = NULL,
+  trans = identity,
+  design_parameters_values = NULL,
+  design_type = "full",
+  methods_col_name = "Method",
+  replace_labels = NULL,
+  spu_x_shift = 1,
+  parameter_decreasing = FALSE
+)
 }
 \arguments{
 \item{resdf}{Data.frame with data to be visualised in wide format with columns: 

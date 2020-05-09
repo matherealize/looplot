@@ -4,8 +4,17 @@
 \alias{add_abline}
 \title{Wrapper to add lines to nested loop plot}
 \usage{
-add_abline(p, slope = 0, intercept = 0, position = "bottom",
-  linetype = 3, size = 0.5, colour = "black", alpha = 1, ...)
+add_abline(
+  p,
+  slope = 0,
+  intercept = 0,
+  position = "bottom",
+  linetype = 3,
+  size = 0.5,
+  colour = "black",
+  alpha = 1,
+  ...
+)
 }
 \arguments{
 \item{p}{\pkg{ggplot2} object, output from \code{\link{nested_loop_plot}} function.}

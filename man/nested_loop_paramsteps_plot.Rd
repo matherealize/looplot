@@ -4,10 +4,17 @@
 \alias{nested_loop_paramsteps_plot}
 \title{Adds step functions for design parameters to a basic facetted nested loop plot}
 \usage{
-nested_loop_paramsteps_plot(p, step_data, steps_names = NULL,
-  steps_names_annotate = TRUE, steps_values_annotate = FALSE,
-  steps_color = "#AAAAAA", steps_annotation_size = 5,
-  steps_annotation_nudge = 0.2, steps_annotation_color = "#AAAAAA")
+nested_loop_paramsteps_plot(
+  p,
+  step_data,
+  steps_names = NULL,
+  steps_names_annotate = TRUE,
+  steps_values_annotate = FALSE,
+  steps_color = "#AAAAAA",
+  steps_annotation_size = 5,
+  steps_annotation_nudge = 0.2,
+  steps_annotation_color = "#AAAAAA"
+)
 }
 \arguments{
 \item{p}{\pkg{ggplot2} object, output from \code{\link{nested_loop_plot}}.}

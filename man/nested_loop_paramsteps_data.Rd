@@ -4,8 +4,12 @@
 \alias{nested_loop_paramsteps_data}
 \title{Generate data for facetted nested loop plots}
 \usage{
-nested_loop_paramsteps_data(plot_data, steps_y_base = 0,
-  steps_y_height = 1, steps_y_shift = NULL)
+nested_loop_paramsteps_data(
+  plot_data,
+  steps_y_base = 0,
+  steps_y_height = 1,
+  steps_y_shift = NULL
+)
 }
 \arguments{
 \item{plot_data}{Outout list from \code{\link{nested_loop_base_data}}.}

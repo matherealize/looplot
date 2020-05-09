@@ -1,5 +1,5 @@
 ---
-title: "loopR: Gallery of examples"
+title: "looplot: Gallery of examples"
 author: "Michael Kammer"
 date: "`r Sys.Date()`"
 output: 
@@ -10,7 +10,7 @@ output:
         toc_depth: 2
         number_sections: true
 vignette: >
-  %\VignetteIndexEntry{loopR: Gallery of examples}
+  %\VignetteIndexEntry{looplot: Gallery of examples}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 bibliography: "Demo_references.bib"
@@ -21,13 +21,13 @@ urlcolor: blue
 library(dplyr)
 library(magrittr)
 library(purrr)
-library(loopR)
+library(looplot)
 ```
 
-This vignette contains example annotated use-cases of the `loopR` package.
+This vignette contains example annotated use-cases of the `looplot` package.
 We introduce several of the available options and briefly explain their effect.
 For an in-depth introduction into the goals of this package and the general 
-workflow, see the vignette ["loopR: A package for creating nested loop plots"](Demo.html).
+workflow, see the vignette ["looplot: A package for creating nested loop plots"](Demo.html).
 
 For many options to further customize the plots, please refer to the 
 documentation of the underlying [ggplot2 package](https://ggplot2.tidyverse.org/index.html).
@@ -100,7 +100,7 @@ print(p)
 ## Only rows
 
 - Only set `grid_rows` argument, move other parameters into `steps`.
-- Re-ajust steps positions.
+- Re-adjust steps positions.
 ```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
 p = nested_loop_plot(resdf = design, 
                      x = "samplesize", steps = c("param2", "param3"),
@@ -514,7 +514,7 @@ the parameter steps have negative y-coordinates, then the approach using `ggplot
 will not work.
 
 Hence, the functionality is implemented by transformation of the data. 
-This can be done by the user outside the `loopR` package or passed to the
+This can be done by the user outside the `looplot` package or passed to the
 functions implemented in this package using the `trans` argument.
 
 Note that this is a transformation of the data. Hence, the y-axis labels are

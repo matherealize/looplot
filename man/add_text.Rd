@@ -4,8 +4,7 @@
 \alias{add_text}
 \title{Wrapper to add text to nested loop plot}
 \usage{
-add_text(p, decimals = 2, mapping = NULL, data = NULL,
-  position = "top", ...)
+add_text(p, decimals = 2, mapping = NULL, data = NULL, position = "top", ...)
 }
 \arguments{
 \item{p}{\pkg{ggplot2} object, output from \code{\link{nested_loop_plot}} function.}

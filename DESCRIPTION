@@ -1,6 +1,6 @@
-Package: loopR
+Package: looplot
 Title: Create nested loop plots
-Version: 0.5.0.9000
+Version: 0.5.0.9001
 Author: Michael Kammer [aut, cre]
 Authors@R: person("Michael", "Kammer", 
     email = "michael.kammer@meduniwien.ac.at", 
@@ -28,7 +28,7 @@ VignetteBuilder: knitr
 License: GPL-2
 LazyData: true
 Encoding: UTF-8
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Collate: 
     'facet_grid_sc.R'
     'libraries.R'

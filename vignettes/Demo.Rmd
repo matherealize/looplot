@@ -1,5 +1,5 @@
 ---
-title: "loopR: A package for creating nested loop plots"
+title: "looplot: A package for creating nested loop plots"
 author: "Michael Kammer"
 date: "`r Sys.Date()`"
 output: 
@@ -10,17 +10,18 @@ output:
         toc_depth: 2
         number_sections: true
 vignette: >
-  %\VignetteIndexEntry{loopR: A package for creating nested loop plots}
+  %\VignetteIndexEntry{looplot: A package for creating nested loop plots}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 bibliography: "Demo_references.bib"
+urlcolor: blue
 ---
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 library(dplyr)
 library(magrittr)
 library(purrr)
-library(loopR)
+library(looplot)
 ```
 
 # Introduction
@@ -43,7 +44,7 @@ simulation studies, which will be the focus of this vignette.
 reporting of the results from such studies. 
 In the following we briefly motivate statistical simulation studies, 
 explain the basic layout of nested loop plots and demonstrate the use
-of the `loopR` package to create such visualisations. 
+of the `looplot` package to create such visualisations. 
 
 ## Simulation studies in statistical research
 Simulation studies in statistics or other methodological research fields are 
@@ -114,13 +115,13 @@ parameters are conducted.
 performance measures.
 - The number of design parameters (e.g. 4 to 6) and methods evaluated is moderate.
 
-## Workflow with the `loopR` package
+## Workflow with the `looplot` package
 
 This package is based on [`ggplot2`](https://ggplot2.tidyverse.org/) and 
 offers several functions which aid in the process of creating nested loop 
 plots with facetting.
 
-The starting point for the `loopR` package is a dataframe comprising
+The starting point for the `looplot` package is a dataframe comprising
 the results for a single performance measure from the simulation study, 
 very similar to how the results could be presented in a table. In fact, one 
 could think of nested loop plots as a more intuitive, visual way to present
@@ -136,7 +137,7 @@ We will give an example of such a dataframe in the [examples below](#data).
 
 The user then defines the arrangement of the data within the nested loop plot 
 and how the data should be displayed. There are two ways to work with the
-`loopR` package: one with basic options for users who are less familiar
+`looplot` package: one with basic options for users who are less familiar
 with the underlying `ggplot2` framework, and the other for users who
 require modular access to specific parts of the plot to fine-tune the display.
 In either case, the resulting plot object is a `ggplot2` object and can 
@@ -145,13 +146,13 @@ many of the options have similar names and behaviour as comparable options
 in `ggplot2`, so some familiarity with the concepts is helpful to make the 
 most out of this package. 
 We will give an overview of many of the available options by demonstrating 
-several aspects of the `loopR` package in the following examples.
+several aspects of the `looplot` package in the following examples.
 
 # Basic data example {#data}
 
 This vignette makes use of the [`tidyverse`](https://www.tidyverse.org/) 
 environment of packages and specifically requires the `dplyr`, 
-`purr` and `magrittr` packages, besides the `loopR` package 
+`purr` and `magrittr` packages, besides the `looplot` package 
 to be available. Please refer to
 [the R environment used to create this vignette](#rsession) for 
 detailed information.
@@ -191,7 +192,7 @@ design %<>%
                            mean = param1 * (param2 + param3 + 3000 / samplesize), 
                            sd = 2))
 
-print(head(design, n = 10))
+knitr::kable(head(design, n = 10))
 ```
 
 # Layout of the nested loop plot {#layout}
@@ -200,7 +201,7 @@ The key elements of the original nested loop plot as suggested in @NestedLoop ar
 the display of the results of each individual method and simulation scenario, 
 as well as the display of the design parameters by virtue of plotting step
 functions representing the values of the parameters. 
-In the `loopR` package a lot of emphasis is given to the aspect of facetting, 
+In the `looplot` package a lot of emphasis is given to the aspect of facetting, 
 to further divide the plot into small panels and make the plot visually less
 cluttered. Furthermore, facetting also allows to easily zoom into specific
 design parameter combinations and only drawing panels for specific parameter
@@ -229,7 +230,7 @@ and therefore ideally defines either the columns or the rows of the
 facetted plot. 
 
 The role of the other parameters is less clear and their influence on the 
-display of the results can be easily changed in the `loopR` functions to 
+display of the results can be easily changed in the `looplot` functions to 
 interactively get a good understanding of the study results.
 
 # Basic plot examples

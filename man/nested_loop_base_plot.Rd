@@ -4,14 +4,27 @@
 \alias{nested_loop_base_plot}
 \title{Basic facetted nested loop plots}
 \usage{
-nested_loop_base_plot(plot_data, grid_scales = "fixed",
-  y_name = waiver(), x_name = waiver(), legend_name = "Method",
-  legend_breaks = waiver(), legend_labels = NULL,
-  draw = list(add_points = list(alpha = 1), add_lines = list(size = 0.5,
-  alpha = 1)), connect_spus = FALSE, colors = NULL, shapes = 19,
-  linetypes = 1, sizes = 1, x_labels = waiver(), ylim = NULL,
-  y_breaks = waiver(), y_labels = waiver(), na_rm = TRUE,
-  base_size = 12)
+nested_loop_base_plot(
+  plot_data,
+  grid_scales = "fixed",
+  y_name = waiver(),
+  x_name = waiver(),
+  legend_name = "Method",
+  legend_breaks = waiver(),
+  legend_labels = NULL,
+  draw = list(add_points = list(alpha = 1), add_lines = list(size = 0.5, alpha = 1)),
+  connect_spus = FALSE,
+  colors = NULL,
+  shapes = 19,
+  linetypes = 1,
+  sizes = 1,
+  x_labels = waiver(),
+  ylim = NULL,
+  y_breaks = waiver(),
+  y_labels = waiver(),
+  na_rm = TRUE,
+  base_size = 12
+)
 }
 \arguments{
 \item{plot_data}{Output list from \code{\link{nested_loop_base_data}}.}
