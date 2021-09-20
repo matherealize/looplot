@@ -1,6 +1,6 @@
 Package: looplot
 Title: Create nested loop plots
-Version: 0.5.0.9001
+Version: 0.5.0.9002
 Author: Michael Kammer [aut, cre]
 Authors@R: person("Michael", "Kammer", 
     email = "michael.kammer@meduniwien.ac.at", 
@@ -11,7 +11,7 @@ Description: Generate nested loop plots to display results from controlled
 	Presenting simulation results in a nested loop plot. 
 	BMC Medical Research Methodology 14(1) <doi:10.1186/1471-2288-14-129>.
 Depends:
-    R (>= 3.4.1), 
+    R (>= 3.4.0), 
 	dplyr (>= 0.7.6),
 	ggplot2 (>= 3.2.1), 
 	purrr (>= 0.2.5),
@@ -25,7 +25,7 @@ Suggests:
     knitr, 
     rmarkdown
 VignetteBuilder: knitr
-License: GPL-2
+License: GPL-2 | file LICENSE
 LazyData: true
 Encoding: UTF-8
 RoxygenNote: 7.0.2

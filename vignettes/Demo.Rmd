@@ -276,9 +276,9 @@ manipulating the resulting plot object and are incorporated into the
 familiarity of the `ggplot2` framework.
 
 ```{r message=FALSE, warning=FALSE, echo=TRUE, results="hide"}
-p = nested_loop_plot(resdf = design, 
+p = nested_loop_plot(resdf = design %>% rename(`beta[LY]` = param1), 
                      x = "samplesize", steps = "param3",
-                     grid_rows = "param2", grid_cols = "param1", 
+                     grid_rows = "param2", grid_cols = "beta[LY]", 
                      steps_y_base = -10, steps_y_height = 5, 
                      x_name = "Samplesize", y_name = "Error",
                      spu_x_shift = 75,

@@ -17,5 +17,5 @@ devtools::install_github("matherealize/looplot")
 ## Useage
 Please take a look at the package vignettes:
 
-- [Introduction to nested loop plots and basic workflow](https://matherealize.github.io/Demo.html)
-- [Annotated gallery of examples and advanced functionality](https://matherealize.github.io/Gallery.html)
+- [Introduction to nested loop plots and basic workflow](https://matherealize.github.io/looplot_demo.html)
+- [Annotated gallery of examples and advanced functionality](https://matherealize.github.io/looplot_gallery.html)
