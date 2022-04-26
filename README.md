@@ -14,8 +14,14 @@ devtools::install_github("matherealize/looplot")
 # devtools::install_github("matherealize/looplot", build_vignettes = TRUE)
 ```
 
-## Useage
+## Usage
 Please take a look at the package vignettes:
 
 - [Introduction to nested loop plots and basic workflow](https://matherealize.github.io/looplot_demo.html)
 - [Annotated gallery of examples and advanced functionality](https://matherealize.github.io/looplot_gallery.html)
+
+## Contact
+
+For feedback and issues when working with the package please create a new
+[Issue here at Github](https://github.com/matherealize/looplot/issues) or 
+send [me an email](mailto:michael.kammer@meduniwien.ac.at).
