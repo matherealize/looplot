@@ -12,6 +12,7 @@ nested_loop_base_plot(
   legend_name = "Method",
   legend_breaks = waiver(),
   legend_labels = NULL,
+  labeller = label_both_custom,
   draw = list(add_points = list(alpha = 1), add_lines = list(size = 0.5, alpha = 1)),
   connect_spus = FALSE,
   colors = NULL,
@@ -45,6 +46,10 @@ if one of them is changed from the default.}
 \item{legend_labels}{NULL or character vector which is used as keys in legend. Overrides variable 
 columns names in resdf. Must be the same length as \code{legend_breaks}, 
 if one of them is changed from the default.}
+
+\item{labeller}{Labeller function to format strip labels of the facet grid. By default 
+uses a custom version of \code{ggplot2::label_both}, but can be customized
+according to \code{\link{labeller}}.}
 
 \item{draw}{Named list of lists. Each entry specifies as its name a wrapper function
 (one of \code{\link{add_points}, \link{add_lines}, \link{add_steps}}) and 

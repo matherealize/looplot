@@ -19,6 +19,7 @@ nested_loop_plot(
   parameter_decreasing = FALSE,
   spu_x_shift = 1,
   grid_scales = "fixed",
+  grid_labeller = label_both_custom,
   replace_labels = NULL,
   y_name = waiver(),
   x_name = waiver(),
@@ -126,6 +127,10 @@ of factor levels).}
 
 \item{grid_scales}{Analogous to \code{scales} argument of \code{\link{facet_grid}}. 
 For some usage hints, see Details below.}
+
+\item{grid_labeller}{Labeller function to format strip labels of the facet grid. By default 
+uses a custom version of \code{ggplot2::label_both}, but can be customized
+according to \code{\link{labeller}}.}
 
 \item{replace_labels}{NULL or named list of character vectors which facilitates renaming of design 
 parameter values. The names correspond to names of design parameters as 

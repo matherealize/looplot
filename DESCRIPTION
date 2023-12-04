@@ -28,7 +28,7 @@ VignetteBuilder: knitr
 License: GPL-2 | file LICENSE
 LazyData: true
 Encoding: UTF-8
-RoxygenNote: 7.0.2
+RoxygenNote: 7.2.3
 Collate: 
     'facet_grid_sc.R'
     'libraries.R'

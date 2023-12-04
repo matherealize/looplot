@@ -382,6 +382,10 @@ nested_loop_paramsteps_data <- function(plot_data,
 #' NULL or character vector which is used as keys in legend. Overrides variable 
 #' columns names in resdf. Must be the same length as \code{legend_breaks}, 
 #' if one of them is changed from the default.
+#' @param labeller
+#' Labeller function to format strip labels of the facet grid. By default 
+#' uses a custom version of \code{ggplot2::label_both}, but can be customized
+#' according to \code{\link{labeller}}. 
 #' @param draw
 #' Named list of lists. Each entry specifies as its name a wrapper function
 #' (one of \code{\link{add_points}, \link{add_lines}, \link{add_steps}}) and 
@@ -906,6 +910,10 @@ nested_loop_paramsteps_plot <- function(p, step_data,
 #' @param grid_scales
 #' Analogous to \code{scales} argument of \code{\link{facet_grid}}. 
 #' For some usage hints, see Details below.
+#' @param grid_labeller
+#' Labeller function to format strip labels of the facet grid. By default 
+#' uses a custom version of \code{ggplot2::label_both}, but can be customized
+#' according to \code{\link{labeller}}. 
 #' @param replace_labels
 #' NULL or named list of character vectors which facilitates renaming of design 
 #' parameter values. The names correspond to names of design parameters as 
@@ -1729,9 +1737,11 @@ adjust_ylim <- function(p, y_expand_mult = NULL, y_expand_add = NULL) {
 #' @title Facet labeller helper
 #' 
 #' @description 
-#' Customized label_both from \pkg{ggplot2} 3.0. All we added is a line that 
-#' removes the suffix "_labels_" from the variable names passed to the 
-#' labeller.
+#' Customized \code{label_both} from \pkg{ggplot2} 3.0. 
+#' 
+#' @details 
+#' Removes the suffix "_labels_" from the variable names passed to the 
+#' labeller. This suffix is added during processing of the nested loop data.
 #' 
 #' @export
 label_both_custom <- function(labels, multi_line = TRUE, sep = ": ") {
