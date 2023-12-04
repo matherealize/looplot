@@ -444,6 +444,7 @@ nested_loop_base_plot <- function(plot_data,
                                   legend_name = "Method",
                                   legend_breaks = waiver(),
                                   legend_labels = NULL,
+                                  labeller = label_both_custom,
                                   draw = list(
                                       add_points = list(
                                           alpha = 1
@@ -486,6 +487,9 @@ nested_loop_base_plot <- function(plot_data,
         colors = viridisLite::viridis(n_methods)
     if (is.function(colors))
         colors = colors(n_methods)
+    
+    if (is.null(labeller))
+        labeller = label_both_custom
     
     # extract x-axis information for labeling and breaks - per facet column
     x_axis_info = plotdf %>% 
@@ -564,7 +568,7 @@ nested_loop_base_plot <- function(plot_data,
     p = p + 
         facet_grid_sc(eval( expr(!!sym(grid_rows) ~ !!sym(grid_cols))),
                       scales = facet_scales,
-                      labeller = label_both_custom)
+                      labeller = labeller)
     
     # remove facet panel labels if they were added by nested_loop_base_data
     if (is.null(input$grid_cols))
@@ -1158,7 +1162,8 @@ nested_loop_paramsteps_plot <- function(p, step_data,
 #' @export
 nested_loop_plot <- function(resdf,
                              x,
-                             grid_rows = NULL, grid_cols = NULL, # TODO: add grid_names as steps_names
+                             grid_rows = NULL, 
+                             grid_cols = NULL, # TODO: add grid_names as steps_names
                              steps = NULL,
                              steps_add = NULL,
                              methods = NULL,
@@ -1169,6 +1174,7 @@ nested_loop_plot <- function(resdf,
                              parameter_decreasing = FALSE,
                              spu_x_shift = 1,
                              grid_scales = "fixed",
+                             grid_labeller = label_both_custom, 
                              replace_labels = NULL,
                              y_name = waiver(),
                              x_name = waiver(),
@@ -1252,6 +1258,7 @@ nested_loop_plot <- function(resdf,
                                  legend_name = legend_name,
                                  legend_breaks = legend_breaks,
                                  legend_labels = legend_labels,
+                                 labeller = grid_labeller, 
                                  draw = draw_list,
                                  connect_spus = connect_spus,
                                  colors = colors, 
@@ -1726,9 +1733,9 @@ adjust_ylim <- function(p, y_expand_mult = NULL, y_expand_add = NULL) {
 #' removes the suffix "_labels_" from the variable names passed to the 
 #' labeller.
 #' 
-#' @noRd
+#' @export
 label_both_custom <- function(labels, multi_line = TRUE, sep = ": ") {
-    value <- ggplot2:::label_value(labels, multi_line = multi_line)
+    value <- ggplot2::label_value(labels, multi_line = multi_line)
     variable <- ggplot2:::label_variable(labels, multi_line = multi_line)
     variable <- Map(gsub, "_labels_", "", variable) # customization
     if (multi_line) {
