@@ -1,6 +1,6 @@
 Package: looplot
 Title: Create nested loop plots
-Version: 0.5.0.9002
+Version: 0.5.0.9003
 Author: Michael Kammer [aut, cre]
 Authors@R: person("Michael", "Kammer", 
     email = "michael.kammer@meduniwien.ac.at", 
@@ -13,7 +13,7 @@ Description: Generate nested loop plots to display results from controlled
 Depends:
     R (>= 3.4.0), 
 	dplyr (>= 0.7.6),
-	ggplot2 (>= 3.2.1), 
+	ggplot2 (>= 4.0), 
 	purrr (>= 0.2.5),
 Imports: 
 	forcats, 	
@@ -28,7 +28,7 @@ VignetteBuilder: knitr
 License: GPL-2 | file LICENSE
 LazyData: true
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3
 Collate: 
     'facet_grid_sc.R'
     'libraries.R'

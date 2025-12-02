@@ -640,7 +640,7 @@ nested_loop_base_plot <- function(plot_data,
     
     # finalize
     p = p +
-        xlab(ifelse(ggplot2:::is.waive(x_name), input$x, x_name)) + 
+        xlab(ifelse(ggplot2:::is_waiver(x_name), input$x, x_name)) + 
         ylab(y_name) +
         coord_cartesian(ylim = ylim, default = TRUE)
     
@@ -1745,24 +1745,11 @@ adjust_ylim <- function(p, y_expand_mult = NULL, y_expand_add = NULL) {
 #' 
 #' @export
 label_both_custom <- function(labels, multi_line = TRUE, sep = ": ") {
-    value <- ggplot2::label_value(labels, multi_line = multi_line)
-    variable <- ggplot2:::label_variable(labels, multi_line = multi_line)
-    variable <- Map(gsub, "_labels_", "", variable) # customization
-    if (multi_line) {
-        out <- vector("list", length(value))
-        for (i in seq_along(out)) {
-            out[[i]] <- paste(variable[[i]], value[[i]], sep = sep)
-        }
-    }
-    else {
-        value <- do.call("paste", list(value, sep = ", "))
-        variable <- do.call("paste", list(variable, sep = ", "))
-        out <- Map(paste, variable, value, sep = sep)
-        out <- list(unname(unlist(out)))
-    }
-    
-    out
+    out <- label_both(labels, multi_line = multi_line, sep = sep)
+    lapply(out, function(x) gsub("_labels_", "", x, fixed = TRUE))
 }
+# append S3 class labeller according to ggplot2::labeller docs
+class(label_both_custom) <- c("function", "labeller")
 
 #' @title Extract scales for facets
 #' 

@@ -85,7 +85,16 @@ facet_grid_sc <- function(rows = NULL, cols = NULL, scales = "fixed",
   facets_list <- ggplot2:::grid_as_facets_list(rows, cols)
 
   # Check for deprecated labellers
-  labeller <- ggplot2:::check_labeller(labeller)
+  # Adapted to ggplot version 3.4+ in Dec 2025
+  if (is.list(labeller)) {
+      labeller <- ggplot2::labeller(.rows = labeller, .cols = labeller)
+  } else if (is.character(labeller) && length(labeller) == 1) {
+      labeller <- ggplot2::labeller(.default = match.fun(labeller))
+  } else if (is.function(labeller)) {
+      labeller <- ggplot2::labeller(.default = labeller)
+  } else {
+      labeller <- ggplot2::label_value
+  }
 
   ggproto(NULL, FacetGridScales,
           shrink = shrink,
