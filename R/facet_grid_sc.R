@@ -85,7 +85,7 @@ facet_grid_sc <- function(rows = NULL, cols = NULL, scales = "fixed",
   facets_list <- ggplot2:::grid_as_facets_list(rows, cols)
 
   # Check for deprecated labellers
-  # Adapted to ggplot version 3.4+ in Dec 2025
+  # Adapted to ggplot version 3.4+ in Dec 2025, based on patch by Moritz Heene
   if (is.list(labeller)) {
       labeller <- ggplot2::labeller(.rows = labeller, .cols = labeller)
   } else if (is.character(labeller) && length(labeller) == 1) {
